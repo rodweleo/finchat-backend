@@ -169,6 +169,12 @@ app.post('/api/v1/mpesa/transactionStatus/resultURL', async (req, res) => {
     }
 });
 
+app.post('/api/v1/whatsapp/callbackURL', async (req, res) => {
+    console.log(req.body)
+
+    res.status(200).json({ message: 'Callback received!' })
+})
+
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });
