@@ -9,7 +9,6 @@ import cors from "cors"
 import { checkCryptoWalletBalance, sendCrypto, verifyCryptoTransaction } from './services/ContractService';
 
 dotenv.config()
-
 const app = express();
 app.use(express.json())
 app.use(cors({
