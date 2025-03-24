@@ -5,6 +5,7 @@ import { HederaNetworkType } from "../types";
 import { AccountId, PendingAirdropId, TokenId, TopicId } from "@hashgraph/sdk";
 import { OpenAIChat } from "@langchain/openai";
 import { get_nse_stocks_data } from "../tools/stocks";
+import { generateAIContent } from "../utils/models/gemini";
 
 
 dotenv.config();
@@ -964,11 +965,17 @@ export class HederaGetNseStockDataTool extends Tool {
     try {
 
       const stocks = await this.hederaKit.getNseStocksdata();
-
-      return JSON.stringify({
+      const humanMessage = await generateAIContent(`
+          Summarize the data below to a format that is easy to read and understand for a user in Whatsapp:
+          ${JSON.stringify({
         status: "success",
         stocks: stocks,
-      });
+      })
+        }
+        `)
+
+      return humanMessage
+
     } catch (error: any) {
       return JSON.stringify({
         status: "error",
