@@ -1,9 +1,10 @@
 import { Tool } from "@langchain/core/tools";
 import HederaAgentKit from "../agent";
 import * as dotenv from "dotenv";
-import {HederaNetworkType} from "../types";
+import { HederaNetworkType } from "../types";
 import { AccountId, PendingAirdropId, TokenId, TopicId } from "@hashgraph/sdk";
 import { OpenAIChat } from "@langchain/openai";
+import { get_nse_stocks_data } from "../tools/stocks";
 
 
 dotenv.config();
@@ -170,7 +171,7 @@ If no input is given (empty JSON '{}'), it returns the balance of the connected 
 `
 
 
-constructor(private hederaKit: HederaAgentKit) {
+  constructor(private hederaKit: HederaAgentKit) {
 
     super()
   }
@@ -232,14 +233,14 @@ If no account ID is given, it returns the balance for the connected account.
       }
 
       const balance = await this.hederaKit.getHtsBalance(
-          parsedInput.tokenId,
-          process.env.HEDERA_NETWORK as HederaNetworkType,
-          parsedInput?.accountId
+        parsedInput.tokenId,
+        process.env.HEDERA_NETWORK as HederaNetworkType,
+        parsedInput?.accountId
       )
 
       const details = await this.hederaKit.getHtsTokenDetails(
-          parsedInput?.tokenId,
-          process.env.HEDERA_NETWORK as HederaNetworkType
+        parsedInput?.tokenId,
+        process.env.HEDERA_NETWORK as HederaNetworkType
       )
 
       return JSON.stringify({
@@ -307,7 +308,7 @@ Example usage:
   }
 }
 
-export class HederaAssociateTokenTool extends Tool { 
+export class HederaAssociateTokenTool extends Tool {
   name = 'hedera_associate_token'
 
   description = `Associate a token to an account on Hedera
@@ -628,7 +629,7 @@ Example usage:
       const airdrop = await this.hederaKit.getPendingAirdrops(
         parsedInput.accountId,
         process.env.HEDERA_NETWORK as HederaNetworkType
-      ); 
+      );
 
       return JSON.stringify({
         status: "success",
@@ -948,6 +949,38 @@ Example usage:
 }
 
 
+export class HederaGetNseStockDataTool extends Tool {
+  name = 'get_nse_stocks_data'
+
+  description = `Retrieves the Nairobi Stock Exchange stocks data.`
+
+
+  constructor(private hederaKit: HederaAgentKit) {
+
+    super()
+  }
+
+  protected async _call(): Promise<string> {
+    try {
+
+      const stocks = await get_nse_stocks_data();
+
+      return JSON.stringify({
+        status: "success",
+        stocks: stocks,
+      });
+    } catch (error: any) {
+      return JSON.stringify({
+        status: "error",
+        message: error.message,
+        code: error.code || "UNKNOWN_ERROR",
+      });
+    }
+  }
+}
+
+
+
 export function createHederaTools(hederaKit: HederaAgentKit): Tool[] {
   return [
     new HederaCreateFungibleTokenTool(hederaKit),
@@ -970,6 +1003,7 @@ export function createHederaTools(hederaKit: HederaAgentKit): Tool[] {
     new HederaDeleteTopicTool(hederaKit),
     new HederaSubmitTopicMessageTool(hederaKit),
     new HederaGetTopicInfoTool(hederaKit),
-    new HederaGetTopicMessagesTool(hederaKit)
+    new HederaGetTopicMessagesTool(hederaKit),
+    new HederaGetNseStockDataTool(hederaKit)
   ]
 }

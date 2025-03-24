@@ -1,0 +1,1 @@
+export { get_nse_stocks_data } from './get_nse_stocks_data';

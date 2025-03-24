@@ -10,6 +10,7 @@ import { checkCryptoWalletBalance, sendCrypto, verifyCryptoTransaction } from '.
 import { sendWhatsAppMessage } from './services/WhatsappService';
 import { HumanMessage } from '@langchain/core/messages';
 import { initializeAgent } from './utils/initializeAgent';
+import { get_nse_stocks_data } from './tools/stocks';
 
 dotenv.config()
 const app = express();
@@ -20,11 +21,11 @@ app.use(cors({
 
 const { WEBHOOK_VERIFY_TOKEN, PORT, CLOUD_API_ACCESS_TOKEN, CLOUD_API_VERSION } = process.env;
 
-app.get('/', (req, res) => {
-    console.log(req)
-    res.status(200).json({
-        message: "Welcome to FinChat!"
-    })
+app.get('/', async (req, res) => {
+
+    const stocks = await get_nse_stocks_data();
+
+    res.status(200).json(stocks)
 })
 
 
