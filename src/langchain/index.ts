@@ -952,7 +952,7 @@ Example usage:
 export class HederaGetNseStockDataTool extends Tool {
   name = 'get_nse_stocks_data'
 
-  description = `Retrieves the Nairobi Stock Exchange stocks data.`
+  description = `Retrieves the Nairobi Stock Exchange stocks data stored in the application database.`
 
 
   constructor(private hederaKit: HederaAgentKit) {

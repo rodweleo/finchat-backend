@@ -7,14 +7,13 @@ export const get_nse_stocks_data = async () => {
 
     if (error) {
         return {
-            status: error.code,
-            error: {
-                message: error.message
-            }
+            status: false,
+            stocks: []
         }
     }
 
     return {
+        status: true,
         stocks: data
     }
 }

@@ -53,7 +53,8 @@ import {
   AssetAllowanceResult,
   CreateNFTOptions,
   CreateFTOptions,
-  MintNFTResult
+  MintNFTResult,
+  NseStockData
 } from "../types";
 import { AirdropRecipient } from "../tools/hts/transactions/airdrop";
 import { get_nse_stocks_data } from "../tools/stocks";
@@ -281,7 +282,7 @@ export default class HederaAgentKit {
   }
 
   async getNseStocksdata(
-  ) {
+  ): Promise<NseStockData> {
     return get_nse_stocks_data();
   }
 }

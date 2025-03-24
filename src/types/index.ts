@@ -18,7 +18,7 @@ export type TokenHoldersBalancesApiResponse = {
     };
 };
 
-export type DetailedTokenBalance= {
+export type DetailedTokenBalance = {
     tokenId: string;
     tokenSymbol: string;
     tokenName: string;
@@ -219,10 +219,14 @@ export type HCSMessageApiResponse = {
     };
 };
 
-export interface CreateNFTOptions extends Omit<CreateTokenOptions, "tokenType" | "client" | "decimals" | "initialSupply">{
+export interface CreateNFTOptions extends Omit<CreateTokenOptions, "tokenType" | "client" | "decimals" | "initialSupply"> {
 
 }
 
 export interface CreateFTOptions extends Omit<CreateTokenOptions, "tokenType" | "client"> {
 }
 
+export type NseStockData = {
+    status: boolean;
+    stocks: any[]
+}
