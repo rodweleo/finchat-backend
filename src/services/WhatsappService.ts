@@ -21,33 +21,43 @@ export async function send_message(recipient_number: number) {
     }
 }
 
+export interface SendWhatsAppMessageProps {
+    to: number;
+    messageId: string;
+    text: string
+}
 
-
-export const sendWhatsAppMessage = async (recipient_number: number) => {
+export const sendWhatsAppMessage = async ({ to, messageId, text }: SendWhatsAppMessageProps) => {
     try {
         const response = await axios.post(
             `https://graph.facebook.com/${process.env.CLOUD_API_VERSION!}/${process.env.WA_PHONE_NUMBER_ID!}/messages`,
             {
                 messaging_product: "whatsapp",
                 recipient_type: 'individual',
-                to: recipient_number,
-                type: "template",
-                template: {
-                    name: "finchat_transaction_success",
-                    language: {
-                        code: "en_US",
-                    },
-                    components: [
-                        {
-                            type: "body",
-                            parameters: [
-                                { type: "text", text: "Winnie Gitau" },
-                                { type: "text", text: "500 HBAR" },
-                                { type: "text", text: "50 KPLC Shares" },
-                            ],
-                        },
-                    ],
+                to: to,
+                type: "text",
+                // template: {
+                //     name: "finchat_transaction_success",
+                //     language: {
+                //         code: "en_US",
+                //     },
+                //     components: [
+                //         {
+                //             type: "body",
+                //             parameters: [
+                //                 { type: "text", text: "Winnie Gitau" },
+                //                 { type: "text", text: "500 HBAR" },
+                //                 { type: "text", text: "50 KPLC Shares" },
+                //             ],
+                //         },
+                //     ],
+                // },
+                text: {
+                    "body": text
                 },
+                context: {
+                    message_id: messageId
+                }
 
             },
             {
@@ -63,5 +73,3 @@ export const sendWhatsAppMessage = async (recipient_number: number) => {
         console.error("Error sending message:", error.response?.data || error.message);
     }
 };
-
-sendWhatsAppMessage(254721540981)

@@ -7,6 +7,9 @@ import { supabaseClient } from './utils/supabaseClient';
 import { checkMpesaTransactionStatus } from './services/TransactionService';
 import cors from "cors"
 import { checkCryptoWalletBalance, sendCrypto, verifyCryptoTransaction } from './services/ContractService';
+import { sendWhatsAppMessage } from './services/WhatsappService';
+import { HumanMessage } from '@langchain/core/messages';
+import { initializeAgent } from './utils/initializeAgent';
 
 dotenv.config()
 const app = express();
@@ -187,40 +190,60 @@ app.post('/api/v1/whatsapp/webhook', async (req, res) => {
 
     // check if the incoming message contains text
     if (message?.type === "text") {
+
+        const userInput = message.text.body;
+        const userPhoneNumber = message.from;
+        const messageId = message.id;
+
         // extract the business number to send the reply from it
-        const business_phone_number_id =
-            req.body.entry?.[0].changes?.[0].value?.metadata?.phone_number_id;
+        const business_phone_number_id = req.body.entry?.[0].changes?.[0].value?.metadata?.phone_number_id;
 
-        // send a reply message as per the docs here https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages
-        await axios({
-            method: "POST",
-            url: `https://graph.facebook.com/v18.0/${business_phone_number_id}/messages`,
-            headers: {
-                Authorization: `Bearer ${GRAPH_API_TOKEN}`,
-            },
-            data: {
-                messaging_product: "whatsapp",
-                to: message.from,
-                text: { body: "Echo: " + message.text.body },
-                context: {
-                    message_id: message.id, // shows the message as a reply to the original user message
+        try {
+            // Initialize the agent
+            const { agent, config } = await initializeAgent();
+
+            // Send user input to the agent
+            const stream = await agent.stream(
+                { messages: [new HumanMessage(userInput)] },
+                config
+            );
+
+            let agentResponse = "";
+
+            for await (const chunk of stream) {
+                if ("agent" in chunk) {
+                    agentResponse += chunk.agent.messages[0].content + " ";
+                } else if ("tools" in chunk) {
+                    agentResponse += chunk.tools.messages[0].content + " ";
+                }
+            }
+
+            // Send the response to the user on WhatsApp
+            await sendWhatsAppMessage({ to: userPhoneNumber, messageId: messageId, text: agentResponse.trim() });
+
+            // Mark message as read
+            await axios.post(
+                `https://graph.facebook.com/v18.0/${business_phone_number_id}/messages`,
+                {
+                    messaging_product: "whatsapp",
+                    status: "read",
+                    message_id: messageId,
                 },
-            },
-        });
-
-        // mark incoming message as read
-        await axios({
-            method: "POST",
-            url: `https://graph.facebook.com/v18.0/${business_phone_number_id}/messages`,
-            headers: {
-                Authorization: `Bearer ${GRAPH_API_TOKEN}`,
-            },
-            data: {
-                messaging_product: "whatsapp",
-                status: "read",
-                message_id: message.id,
-            },
-        });
+                {
+                    headers: {
+                        Authorization: `Bearer ${GRAPH_API_TOKEN}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+        } catch (error) {
+            console.error("Error processing message:", error);
+            await sendWhatsAppMessage({
+                to: userPhoneNumber,
+                messageId: messageId,
+                text: "Sorry, an error occurred while processing your request."
+            });
+        }
     }
 
     res.sendStatus(200);

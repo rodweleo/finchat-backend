@@ -31,7 +31,7 @@ function validateEnvironment(): void {
 
 validateEnvironment();
 
-async function initializeAgent() {
+export async function initializeAgent() {
   try {
     const llm = new ChatGoogleGenerativeAI({
       modelName: "gemini-1.5-flash",
@@ -153,6 +153,46 @@ async function runChatMode(agent: any, config: any) {
   }
 }
 
+export async function runWhatsappChatMode(agent: any, config: any) {
+  console.log("Starting whatsapp chat mode... Type 'exit' to end.");
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  const question = (prompt: string): Promise<string> =>
+    new Promise((resolve) => rl.question(prompt, resolve));
+
+  try {
+    while (true) {
+      const userInput = await question("\nPrompt: ");
+
+      if (userInput.toLowerCase() === "exit") {
+        break;
+      }
+
+      const stream = await agent.stream({ messages: [new HumanMessage(userInput)] }, config);
+
+      for await (const chunk of stream) {
+        if ("agent" in chunk) {
+          console.log(chunk.agent.messages[0].content);
+        } else if ("tools" in chunk) {
+          console.log(chunk.tools.messages[0].content);
+        }
+        console.log("-------------------");
+      }
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error:", error.message);
+    }
+    process.exit(1);
+  } finally {
+    rl.close();
+  }
+}
+
 async function chooseMode(): Promise<"chat" | "auto"> {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -185,6 +225,25 @@ async function chooseMode(): Promise<"chat" | "auto"> {
 async function main() {
   try {
     console.log("Starting Agent...");
+    const { agent, config } = await initializeAgent();
+    const mode = await chooseMode();
+
+    if (mode === "chat") {
+      await runChatMode(agent, config);
+    } else {
+      await runAutonomousMode(agent, config);
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error:", error.message);
+    }
+    process.exit(1);
+  }
+}
+
+export async function mainWhatsappChat() {
+  try {
+    console.log("Starting FinChat Agent...");
     const { agent, config } = await initializeAgent();
     const mode = await chooseMode();
 
