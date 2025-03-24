@@ -18,7 +18,7 @@ app.use(cors({
     origin: "*"
 }))
 
-const { WEBHOOK_VERIFY_TOKEN, GRAPH_API_TOKEN, PORT } = process.env;
+const { WEBHOOK_VERIFY_TOKEN, PORT, CLOUD_API_ACCESS_TOKEN, CLOUD_API_VERSION } = process.env;
 
 app.get('/', (req, res) => {
     console.log(req)
@@ -223,7 +223,7 @@ app.post('/api/v1/whatsapp/webhook', async (req, res) => {
 
             // Mark message as read
             await axios.post(
-                `https://graph.facebook.com/v18.0/${business_phone_number_id}/messages`,
+                `https://graph.facebook.com/${CLOUD_API_VERSION}/${business_phone_number_id}/messages`,
                 {
                     messaging_product: "whatsapp",
                     status: "read",
@@ -231,13 +231,13 @@ app.post('/api/v1/whatsapp/webhook', async (req, res) => {
                 },
                 {
                     headers: {
-                        Authorization: `Bearer ${GRAPH_API_TOKEN}`,
+                        Authorization: `Bearer ${CLOUD_API_ACCESS_TOKEN}`,
                         "Content-Type": "application/json",
                     },
                 }
             );
         } catch (error) {
-            console.error("Error processing message:", error);
+            console.error(error);
             await sendWhatsAppMessage({
                 to: userPhoneNumber,
                 messageId: messageId,
