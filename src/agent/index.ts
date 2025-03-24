@@ -56,6 +56,7 @@ import {
   MintNFTResult
 } from "../types";
 import { AirdropRecipient } from "../tools/hts/transactions/airdrop";
+import { get_nse_stocks_data } from "../tools/stocks";
 
 
 export default class HederaAgentKit {
@@ -126,46 +127,46 @@ export default class HederaAgentKit {
   }
 
   async getHtsBalance(
-      tokenId: string,
-      networkType: HederaNetworkType,
-      accountId?: string
+    tokenId: string,
+    networkType: HederaNetworkType,
+    accountId?: string
   ): Promise<number> {
     const targetAccountId = accountId || this.client.operatorAccountId;
     return get_hts_balance(tokenId, networkType, targetAccountId as string);
   }
 
   async getAllTokensBalances(
-      networkType: HederaNetworkType,
-      accountId?: string
+    networkType: HederaNetworkType,
+    accountId?: string
   ) {
     const targetAccountId = accountId || this.client.operatorAccountId;
     return get_all_tokens_balances(networkType, targetAccountId as string);
   }
 
   async getHtsTokenDetails(
-      tokenId: string,
-      networkType: HederaNetworkType
+    tokenId: string,
+    networkType: HederaNetworkType
   ): Promise<HtsTokenDetails> {
     return get_hts_token_details(tokenId, networkType);
   }
 
   async getTokenHolders(
-      tokenId: string | TokenId,
-      networkType: HederaNetworkType,
-      threshold?: number,
+    tokenId: string | TokenId,
+    networkType: HederaNetworkType,
+    threshold?: number,
   ): Promise<Array<TokenBalance>> {
     return get_token_holders(tokenId.toString(), networkType, threshold);
   }
 
   async associateToken(
-      tokenId: TokenId
+    tokenId: TokenId
   ): Promise<AssociateTokenResult> {
     return associate_token(tokenId, this.client);
   }
 
   async dissociateToken(
-      tokenId: TokenId
-  ): Promise <DissociateTokenResult> {
+    tokenId: TokenId
+  ): Promise<DissociateTokenResult> {
     return dissociate_token(tokenId, this.client);
   }
 
@@ -181,101 +182,106 @@ export default class HederaAgentKit {
   }
 
   async rejectToken(
-      tokenId: TokenId,
+    tokenId: TokenId,
   ): Promise<RejectTokenResult> {
     return reject_token(
-        tokenId,
-        this.client
+      tokenId,
+      this.client
     );
   }
 
   async mintToken(
-      tokenId: TokenId,
-      amount: number
+    tokenId: TokenId,
+    amount: number
   ): Promise<MintTokenResult> {
     return mint_token(
-        tokenId,
-        amount,
-        this.client
+      tokenId,
+      amount,
+      this.client
     );
   }
 
   async mintNFTToken(
-      tokenId: TokenId,
-      tokenMetadata: Uint8Array<ArrayBufferLike>
+    tokenId: TokenId,
+    tokenMetadata: Uint8Array<ArrayBufferLike>
   ): Promise<MintNFTResult> {
     return mint_nft(
-        tokenId,
-        tokenMetadata,
-        this.client
+      tokenId,
+      tokenMetadata,
+      this.client
     )
   }
 
   async transferHbar(
-      toAccountId: string | AccountId,
-      amount: string
+    toAccountId: string | AccountId,
+    amount: string
   ): Promise<TransferHBARResult> {
     return transfer_hbar(
-        this.client,
-        toAccountId,
-        amount,
+      this.client,
+      toAccountId,
+      amount,
     )
   }
 
   async claimAirdrop(
-      airdropId: PendingAirdropId
+    airdropId: PendingAirdropId
   ): Promise<ClaimAirdropResult> {
     return claim_airdrop(this.client, airdropId)
   }
 
   async getPendingAirdrops(
-      accountId: string,
-      networkType: HederaNetworkType
+    accountId: string,
+    networkType: HederaNetworkType
   ): Promise<Airdrop[]> {
     return get_pending_airdrops(networkType, accountId)
   }
 
   async createTopic(
-      topicMemo: string,
-      isSubmitKey: boolean,
+    topicMemo: string,
+    isSubmitKey: boolean,
   ): Promise<CreateTopicResult> {
     return create_topic(topicMemo, this.client, isSubmitKey);
   }
 
   async deleteTopic(
-      topicId: TopicId
+    topicId: TopicId
   ): Promise<DeleteTopicResult> {
     return delete_topic(topicId, this.client)
   }
 
   async getTopicInfo(
-      topicId: TopicId,
-      networkType: HederaNetworkType,
+    topicId: TopicId,
+    networkType: HederaNetworkType,
   ): Promise<TopicInfoApiResponse> {
     return get_topic_info(topicId, networkType)
   }
 
   async submitTopicMessage(
-      topicId: TopicId,
-      message: string,
+    topicId: TopicId,
+    message: string,
   ): Promise<SubmitMessageResult> {
     return submit_topic_message(topicId, message, this.client)
   }
 
   async getTopicMessages(
-      topicId: TopicId,
-      networkType: HederaNetworkType,
-      lowerTimestamp?: number,
-      upperTimestamp?: number,
+    topicId: TopicId,
+    networkType: HederaNetworkType,
+    lowerTimestamp?: number,
+    upperTimestamp?: number,
   ): Promise<Array<HCSMessage>> {
     return get_topic_messages(topicId, networkType, lowerTimestamp, upperTimestamp);
   }
 
   async approveAssetAllowance(
-      spenderAccount: AccountId,
-      amount: number,
-      tokenId?: TokenId,
+    spenderAccount: AccountId,
+    amount: number,
+    tokenId?: TokenId,
   ): Promise<AssetAllowanceResult> {
     return approve_asset_allowance(spenderAccount, tokenId, amount, this.client);
+  }
+
+  async getNseStocksdata(
+  ) {
+    return get_nse_stocks_data();
   }
 }

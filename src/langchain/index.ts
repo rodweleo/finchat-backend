@@ -963,7 +963,7 @@ export class HederaGetNseStockDataTool extends Tool {
   protected async _call(): Promise<string> {
     try {
 
-      const stocks = await get_nse_stocks_data();
+      const stocks = await this.hederaKit.getNseStocksdata();
 
       return JSON.stringify({
         status: "success",
