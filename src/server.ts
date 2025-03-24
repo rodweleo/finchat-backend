@@ -18,6 +18,13 @@ app.use(cors({
 
 const { WEBHOOK_VERIFY_TOKEN, GRAPH_API_TOKEN, PORT } = process.env;
 
+app.get('/', (req, res) => {
+    console.log(req)
+    res.status(200).json({
+        message: "Welcome to FinChat!"
+    })
+})
+
 
 app.post("/api/v1/crypto/payment/send", async (req, res) => {
     const { to, amount } = req.body;
