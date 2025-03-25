@@ -29,7 +29,8 @@ import {
   transfer_hbar,
   get_topic_info,
   get_topic_messages,
-  mint_nft
+  mint_nft,
+  create_hedera_wallet
 } from "../tools";
 import {
   Airdrop,
@@ -54,7 +55,8 @@ import {
   CreateNFTOptions,
   CreateFTOptions,
   MintNFTResult,
-  NseStockData
+  NseStockData,
+  CreateHederaWalletResponse
 } from "../types";
 import { AirdropRecipient } from "../tools/hts/transactions/airdrop";
 import { get_nse_stocks_data } from "../tools/stocks";
@@ -284,5 +286,10 @@ export default class HederaAgentKit {
   async getNseStocksdata(
   ): Promise<NseStockData> {
     return get_nse_stocks_data();
+  }
+
+
+  async createHederaWallet(): Promise<CreateHederaWalletResponse> {
+    return create_hedera_wallet()
   }
 }

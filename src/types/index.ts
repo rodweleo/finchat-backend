@@ -230,3 +230,10 @@ export type NseStockData = {
     status: boolean;
     stocks: any[]
 }
+
+export type CreateHederaWalletResponse = {
+    accountId: string;
+    publicKey: string;
+    privateKey: string;
+    recoveryPhrase: string
+}

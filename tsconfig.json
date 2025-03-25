@@ -9,6 +9,6 @@
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "include": ["src/**/*", "hardhat.config.js"],
+  "include": ["src/**/*", "hardhat.config.js", "contracts"],
   "exclude": ["node_modules"]
 }

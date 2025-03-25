@@ -3,8 +3,6 @@ import HederaAgentKit from "../agent";
 import * as dotenv from "dotenv";
 import { HederaNetworkType } from "../types";
 import { AccountId, PendingAirdropId, TokenId, TopicId } from "@hashgraph/sdk";
-import { OpenAIChat } from "@langchain/openai";
-import { get_nse_stocks_data } from "../tools/stocks";
 import { generateAIContent } from "../utils/models/gemini";
 
 
@@ -953,7 +951,7 @@ Example usage:
 export class HederaGetNseStockDataTool extends Tool {
   name = 'get_nse_stocks_data'
 
-  description = `Retrieves the Nairobi Stock Exchange stocks data stored in the application database.`
+  description = `Get the stock data stored.`
 
 
   constructor(private hederaKit: HederaAgentKit) {
@@ -971,6 +969,39 @@ export class HederaGetNseStockDataTool extends Tool {
         status: "success",
         stocks: stocks,
       })
+        }
+        `)
+
+      return humanMessage
+
+    } catch (error: any) {
+      return JSON.stringify({
+        status: "error",
+        message: error.message,
+        code: error.code || "UNKNOWN_ERROR",
+      });
+    }
+  }
+}
+
+export class HederaCreateHederaWalletTool extends Tool {
+  name = 'create_hedera_wallet'
+
+  description = `Create an account wallet on Hedera network.`
+
+
+  constructor(private hederaKit: HederaAgentKit) {
+
+    super()
+  }
+
+  protected async _call(): Promise<string> {
+    try {
+
+      const wallet = await this.hederaKit.createHederaWallet();
+      const humanMessage = await generateAIContent(`
+          Format the following information for easier consumption by a Whatsapp user:
+          ${JSON.stringify({ ...wallet })
         }
         `)
 
@@ -1011,6 +1042,7 @@ export function createHederaTools(hederaKit: HederaAgentKit): Tool[] {
     new HederaSubmitTopicMessageTool(hederaKit),
     new HederaGetTopicInfoTool(hederaKit),
     new HederaGetTopicMessagesTool(hederaKit),
-    new HederaGetNseStockDataTool(hederaKit)
+    new HederaGetNseStockDataTool(hederaKit),
+    new HederaCreateHederaWalletTool(hederaKit)
   ]
 }
