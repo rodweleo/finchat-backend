@@ -10,6 +10,6 @@
     "rootDir": "src",
     "baseUrl": "./"
   },
-  "include": ["src/**/*", "hardhat.config.js", "contracts"],
+  "include": ["src/**/*", "hardhat.config.js", "src/contracts"],
   "exclude": ["node_modules"]
 }

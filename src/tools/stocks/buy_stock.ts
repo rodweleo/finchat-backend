@@ -25,3 +25,5 @@ export async function buy_stock(stockSymbol: string, amount: number, clientPriva
         console.error("Error buying stocks:", error);
     }
 }
+
+buy_stock("SCOM", 5, "1dd4a76ef40387669b63a7fe8282bd05624d0b88a9cd92b1a38c46a38d59f8bc")
