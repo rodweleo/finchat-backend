@@ -1,7 +1,6 @@
 import { nseStockInvestmentContract } from "../../blockchain";
 
-
-export const get_all_stocks = async () => {
+export async function get_all_stocks() {
 
     try {
         const result = await nseStockInvestmentContract.getAllStocks();

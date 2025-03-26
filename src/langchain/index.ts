@@ -1276,9 +1276,8 @@ export class HederaGetAllStocksTool extends Tool {
 
       const stocks = this.hederaKit.getAllStocks();
 
-      console.log(stocks)
-
       return JSON.stringify({ stocks: stocks });
+
     } catch (error: any) {
       console.error("Error fetching stocks:", error);
       return JSON.stringify({
