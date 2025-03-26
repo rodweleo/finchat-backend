@@ -59,7 +59,8 @@ import {
   CreateHederaWalletResponse
 } from "../types";
 import { AirdropRecipient } from "../tools/hts/transactions/airdrop";
-import { get_nse_stocks_data } from "../tools/stocks";
+import { buy_stock, get_nse_stocks_data } from "../tools/stocks";
+import { ContractTransactionReceipt } from "ethers";
 
 
 export default class HederaAgentKit {
@@ -288,8 +289,11 @@ export default class HederaAgentKit {
     return get_nse_stocks_data();
   }
 
-
   async createHederaWallet(): Promise<CreateHederaWalletResponse> {
     return create_hedera_wallet()
+  }
+
+  async buyStock(stockSymbol: string, amount: number, clientPrivateKey: string): Promise<ContractTransactionReceipt | undefined> {
+    return buy_stock(stockSymbol, amount, clientPrivateKey)
   }
 }

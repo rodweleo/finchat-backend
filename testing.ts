@@ -28,7 +28,7 @@ async function buyStocks(stockSymbol: string, amount: number) {
         console.log("Transaction Sent:", tx.hash);
 
         const receipt = await tx.wait(); // Wait for transaction confirmation
-        console.log("Transaction Mined:", receipt);
+        console.log(receipt)
     } catch (error) {
         console.error("Error buying stocks:", error);
     }
@@ -36,7 +36,7 @@ async function buyStocks(stockSymbol: string, amount: number) {
 
 
 // console.log(getABI('NSEStockInvestment'))
-// buyStocks('SCOM', 5)
+buyStocks('SCOM', 5)
 
 function hedera_to_eth_address(hederaPublicKey: string) {
     // Remove the first 24 characters of the public key (prefix)
@@ -99,7 +99,7 @@ async function create_hedera_wallet() {
     };
 }
 
-console.log(create_hedera_wallet())
+// console.log(create_hedera_wallet())
 
 // console.log(Mnemonic.generate12().then((res) => {
 //     console.log(res)

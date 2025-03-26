@@ -4,6 +4,7 @@ import * as dotenv from "dotenv";
 import { HederaNetworkType } from "../types";
 import { AccountId, PendingAirdropId, TokenId, TopicId } from "@hashgraph/sdk";
 import { generateAIContent } from "../utils/models/gemini";
+import { ContractTransactionReceipt } from "ethers";
 
 
 dotenv.config();
@@ -1008,6 +1009,75 @@ export class HederaCreateHederaWalletTool extends Tool {
       return humanMessage
 
     } catch (error: any) {
+      return JSON.stringify({
+        status: "error",
+        message: error.message,
+        code: error.code || "UNKNOWN_ERROR",
+      });
+    }
+  }
+}
+
+export class HederaBuyStockTool extends Tool {
+  name = "hedera_buy_stock";
+  description = `Buys stocks from the NSEStockInvestment smart contract on the Hedera network using the user's private key.
+
+  Inputs (input is a JSON string):
+  - stockSymbol: string - The symbol of the stock to purchase, e.g., "SCOM for Safaricom".
+  - amount: number - The number of shares the user wants to buy, e.g., 10.
+  - clientPrivateKey: string - The private key of the user's Hedera wallet for signing transactions.
+
+  Outputs:
+  - Transaction Receipt (JSON object) containing:
+    - transactionHash: string - Hash of the transaction.
+    - status: string - The status of the transaction (e.g., "SUCCESS" or "FAILED").
+    - blockNumber: number - The block number in which the transaction was confirmed.
+    - gasUsed: number - The amount of gas used for the transaction.
+    - logs: array - Any logs emitted during execution.
+  `;
+
+  constructor(private hederaKit: HederaAgentKit) {
+    super();
+  }
+
+  protected async _call(input: string): Promise<string> {
+    try {
+      const { stockSymbol, amount, clientPrivateKey } = JSON.parse(input);
+
+      if (!stockSymbol || !amount || !clientPrivateKey) {
+        return JSON.stringify({
+          status: "error",
+          message: "Missing required input fields: stockSymbol, amount, or clientPrivateKey.",
+          code: "MISSING_INPUT",
+        });
+      }
+
+      const receipt: ContractTransactionReceipt | undefined = await this.hederaKit.buyStock(stockSymbol, amount, clientPrivateKey)
+
+      if (!receipt) {
+        const error = "Error buying stocks. Please try again."
+        console.error(error);
+        return error
+      }
+
+      console.log("Transaction receipt: ", JSON.stringify(receipt));
+
+      const formattedResponse = {
+        transactionHash: receipt.hash,
+        status: receipt.status === 1 ? "SUCCESS" : "FAILED",
+        blockNumber: receipt.blockNumber,
+        gasUsed: receipt.gasUsed.toString(),
+        logs: receipt.logs,
+      };
+
+      const humanMessage = await generateAIContent(`
+        Format the following transaction receipt for easier consumption by a WhatsApp user:
+        ${JSON.stringify(formattedResponse)}
+      `);
+
+      return humanMessage;
+    } catch (error: any) {
+      console.error("Error buying stocks:", error);
       return JSON.stringify({
         status: "error",
         message: error.message,
