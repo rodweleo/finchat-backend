@@ -237,3 +237,11 @@ export type CreateHederaWalletResponse = {
     privateKey: string;
     recoveryPhrase: string
 }
+
+export type GetAllStocksResponse = {
+    symbol: string;
+    name: string;
+    price: number;
+    totalSupply: number;
+    active: boolean
+}

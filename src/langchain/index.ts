@@ -1020,8 +1020,7 @@ export class HederaCreateHederaWalletTool extends Tool {
 
 export class HederaBuyStockTool extends Tool {
   name = "hedera_buy_stock";
-  description = `Buys stocks from the NSEStockInvestment smart contract on the Hedera network using the user's private key.
-
+  description = `Buys stocks from the NSEStockInvestment smart contract on the Hedera network using the user's private key
   Inputs (input is a JSON string):
   - stockSymbol: string - The symbol of the stock to purchase, e.g., "SCOM for Safaricom".
   - amount: number - The number of shares the user wants to buy, e.g., 10.
@@ -1087,6 +1086,209 @@ export class HederaBuyStockTool extends Tool {
   }
 }
 
+// export class HederaSellStockTool extends Tool {
+//   name = "hedera_sell_stock";
+//   description = `Sells stocks from the NSEStockInvestment smart contract on the Hedera network using the user's private key.
+
+//   Inputs (JSON string):
+//   - stockSymbol: string - The symbol of the stock to sell, e.g., "KCB".
+//   - amount: number - The number of shares the user wants to sell.
+//   - clientPrivateKey: string - The private key of the user's Hedera wallet for signing transactions.
+
+//   Outputs:
+//   - Transaction Receipt (JSON object) containing:
+//     - transactionHash: string
+//     - status: string
+//     - blockNumber: number
+//     - gasUsed: number
+//     - logs: array
+//   `;
+
+//   constructor(private hederaKit: HederaAgentKit) {
+//     super();
+//   }
+
+//   protected async _call(input: string): Promise<string> {
+//     try {
+//       const { stockSymbol, amount, clientPrivateKey } = JSON.parse(input);
+
+//       if (!stockSymbol || !amount || !clientPrivateKey) {
+//         return JSON.stringify({
+//           status: "error",
+//           message: "Missing required input fields: stockSymbol, amount, or clientPrivateKey.",
+//           code: "MISSING_INPUT",
+//         });
+//       }
+
+//       const wallet = new ethers.Wallet(clientPrivateKey, provider);
+//       const abi = getContractAbi("NSEStockInvestment");
+//       const contract = new ethers.Contract(nseStockInvestmentContract!, abi, wallet);
+
+//       const tx = await contract.sellStock(stockSymbol, amount);
+//       console.log("Transaction Sent:", tx.hash);
+
+//       const receipt = await tx.wait();
+//       console.log("Transaction receipt: ", JSON.stringify(receipt));
+
+//       const formattedResponse = {
+//         transactionHash: receipt.transactionHash,
+//         status: receipt.status === 1 ? "SUCCESS" : "FAILED",
+//         blockNumber: receipt.blockNumber,
+//         gasUsed: receipt.gasUsed.toString(),
+//         logs: receipt.logs,
+//       };
+
+//       return JSON.stringify(formattedResponse);
+//     } catch (error: any) {
+//       console.error("Error selling stocks:", error);
+//       return JSON.stringify({
+//         status: "error",
+//         message: error.message,
+//         code: error.code || "UNKNOWN_ERROR",
+//       });
+//     }
+//   }
+// }
+
+// export class HederaGetStockTool extends Tool {
+//   name = "hedera_get_stock";
+//   description = `Retrieves details of a stock from the NSEStockInvestment smart contract on the Hedera network.
+
+//   Inputs (JSON string):
+//   - stockSymbol: string - The symbol of the stock, e.g., "KCB".
+
+//   Outputs:
+//   - Stock Details (JSON object) containing:
+//     - name: string
+//     - price: number
+//     - totalSupply: number
+//   `;
+
+//   constructor(private hederaKit: HederaAgentKit) {
+//     super();
+//   }
+
+//   protected async _call(input: string): Promise<string> {
+//     try {
+//       const { stockSymbol } = JSON.parse(input);
+
+//       if (!stockSymbol) {
+//         return JSON.stringify({
+//           status: "error",
+//           message: "Missing required input field: stockSymbol.",
+//           code: "MISSING_INPUT",
+//         });
+//       }
+
+//       const abi = getContractAbi("NSEStockInvestment");
+//       const contract = new ethers.Contract(nseStockInvestmentContract!, abi, provider);
+
+//       const stock = await contract.getStockDetails(stockSymbol);
+
+//       const formattedResponse = {
+//         name: stock[0],
+//         price: stock[1].toString(),
+//         totalSupply: stock[2].toString(),
+//       };
+
+//       return JSON.stringify(formattedResponse);
+//     } catch (error: any) {
+//       console.error("Error fetching stock details:", error);
+//       return JSON.stringify({
+//         status: "error",
+//         message: error.message,
+//         code: error.code || "UNKNOWN_ERROR",
+//       });
+//     }
+//   }
+// }
+
+// export class HederaGetInvestorPortfolioTool extends Tool {
+//   name = "hedera_get_investor_portfolio";
+//   description = `Retrieves the stock portfolio of an investor from the NSEStockInvestment smart contract on the Hedera network.
+
+//   Inputs (JSON string):
+//   - investorAddress: string - The address of the investor.
+
+//   Outputs:
+//   - Investor Portfolio (JSON array) containing:
+//     - symbol: string
+//     - totalShares: number
+//   `;
+
+//   constructor(private hederaKit: HederaAgentKit) {
+//     super();
+//   }
+
+//   protected async _call(input: string): Promise<string> {
+//     try {
+//       const { investorAddress } = JSON.parse(input);
+
+//       if (!investorAddress) {
+//         return JSON.stringify({
+//           status: "error",
+//           message: "Missing required input field: investorAddress.",
+//           code: "MISSING_INPUT",
+//         });
+//       }
+
+//       const abi = getContractAbi("NSEStockInvestment");
+//       const contract = new ethers.Contract(nseStockInvestmentContract!, abi, provider);
+
+//       const holdings = await contract.getInvestorPortfolio(investorAddress);
+
+//       const formattedResponse = holdings.map(([symbol, totalShares]: [string, BigNumber]) => ({
+//         symbol,
+//         totalShares: totalShares.toString(),
+//       }));
+
+//       return JSON.stringify(formattedResponse);
+//     } catch (error: any) {
+//       console.error("Error fetching investor portfolio:", error);
+//       return JSON.stringify({
+//         status: "error",
+//         message: error.message,
+//         code: error.code || "UNKNOWN_ERROR",
+//       });
+//     }
+//   }
+// }
+
+export class HederaGetAllStocksTool extends Tool {
+  name = "hedera_get_all_stocks";
+  description = `Retrieves all listed stocks from the NSEStockInvestment smart contract on the Hedera network.
+
+  Outputs:
+  - stocks: A list of stock data containing:
+    - symbol: string - The stock symbol (e.g., "SCOM").
+    - name: string - The stock name (e.g., "Safaricom").
+    - price: number - The price per share.
+    - totalSupply: number - The total available shares.
+    - active: boolean - the status of the stock (true means it can be traded, false means it is deactivated and can't be traded)
+  `;
+
+  constructor(private hederaKit: HederaAgentKit) {
+    super();
+  }
+
+  protected async _call(): Promise<string> {
+    try {
+
+      const stocks = this.hederaKit.getAllStocks();
+
+      return JSON.stringify({ stocks });
+    } catch (error: any) {
+      console.error("Error fetching stocks:", error);
+      return JSON.stringify({
+        status: "error",
+        message: error.message,
+        code: error.code || "UNKNOWN_ERROR",
+      });
+    }
+  }
+}
+
+
 
 
 export function createHederaTools(hederaKit: HederaAgentKit): Tool[] {
@@ -1114,6 +1316,7 @@ export function createHederaTools(hederaKit: HederaAgentKit): Tool[] {
     new HederaGetTopicMessagesTool(hederaKit),
     new HederaGetNseStockDataTool(hederaKit),
     new HederaCreateHederaWalletTool(hederaKit),
-    new HederaBuyStockTool(hederaKit)
+    new HederaBuyStockTool(hederaKit),
+    new HederaGetAllStocksTool(hederaKit)
   ]
 }

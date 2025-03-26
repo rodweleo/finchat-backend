@@ -56,11 +56,13 @@ import {
   CreateFTOptions,
   MintNFTResult,
   NseStockData,
-  CreateHederaWalletResponse
+  CreateHederaWalletResponse,
+  GetAllStocksResponse
 } from "../types";
 import { AirdropRecipient } from "../tools/hts/transactions/airdrop";
 import { buy_stock, get_nse_stocks_data } from "../tools/stocks";
 import { ContractTransactionReceipt } from "ethers";
+import { get_all_stocks } from "../tools/stocks/get_all_stocks";
 
 
 export default class HederaAgentKit {
@@ -295,5 +297,9 @@ export default class HederaAgentKit {
 
   async buyStock(stockSymbol: string, amount: number, clientPrivateKey: string): Promise<ContractTransactionReceipt | undefined> {
     return buy_stock(stockSymbol, amount, clientPrivateKey)
+  }
+
+  async getAllStocks(): Promise<GetAllStocksResponse[]> {
+    return get_all_stocks()
   }
 }

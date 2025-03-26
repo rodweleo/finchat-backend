@@ -7,9 +7,8 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "rootDir": "src",
-    "baseUrl": "./"
+    "rootDir": "src"
   },
-  "include": ["src/**/*", "hardhat.config.js", "src/contracts"],
+  "include": ["src/**/*", "hardhat.config.js", "contracts"],
   "exclude": ["node_modules"]
 }

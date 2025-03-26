@@ -38,8 +38,8 @@
       ]
     },
     "C:\\Users\\Christy\\projects\\finchat-backend\\contracts\\NSEStockInvestment.sol": {
-      "lastModificationDate": 1742895559281,
-      "contentHash": "01da7dafc2fdd6370685209819b29c41",
+      "lastModificationDate": 1743013509339,
+      "contentHash": "34f8ddf85cd813549c4d8e5b8cab1b6d",
       "sourceName": "contracts/NSEStockInvestment.sol",
       "solcConfig": {
         "version": "0.8.28",
