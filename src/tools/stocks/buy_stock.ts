@@ -1,5 +1,5 @@
 import { ethers, ContractTransactionReceipt } from "ethers";
-import { getContractAbi, nseStockInvestmentContract, provider } from "../../utils/blockchain";
+import { getContractAbi, nseStockInvestmentContract, provider } from "../../blockchain";
 
 export async function buy_stock(stockSymbol: string, amount: number, clientPrivateKey: string) {
 
