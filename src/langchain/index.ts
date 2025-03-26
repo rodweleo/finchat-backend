@@ -1113,6 +1113,7 @@ export function createHederaTools(hederaKit: HederaAgentKit): Tool[] {
     new HederaGetTopicInfoTool(hederaKit),
     new HederaGetTopicMessagesTool(hederaKit),
     new HederaGetNseStockDataTool(hederaKit),
-    new HederaCreateHederaWalletTool(hederaKit)
+    new HederaCreateHederaWalletTool(hederaKit),
+    new HederaBuyStockTool(hederaKit)
   ]
 }
