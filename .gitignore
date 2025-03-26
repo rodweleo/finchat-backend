@@ -1,5 +1,6 @@
 
 node_modules
+dist
 
 .env
 .qodo
@@ -9,7 +10,6 @@ node_modules
 
 # Hardhat files
 /cache
-/artifacts
 
 # TypeChain files
 /typechain
@@ -21,3 +21,5 @@ node_modules
 
 # Hardhat Ignition default folder for deployments against a local node
 ignition/deployments/chain-31337
+
+.vercel
