@@ -18,6 +18,5 @@ export async function get_all_stocks() {
 
     } catch (error) {
         console.error("Error buying stocks:", error);
-        return []
     }
 }
