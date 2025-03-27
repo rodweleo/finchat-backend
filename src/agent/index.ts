@@ -298,7 +298,7 @@ export default class HederaAgentKit {
     return buy_stock(stockSymbol, amount, clientPrivateKey)
   }
 
-  async getAllStocks(): Promise<GetAllStocksResponse[]> {
+  async getAllStocks(): Promise<Array<GetAllStocksResponse>> {
     return get_all_stocks()
   }
 }
