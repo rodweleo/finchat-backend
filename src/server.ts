@@ -10,7 +10,7 @@ import { checkCryptoWalletBalance, sendCrypto, verifyCryptoTransaction } from '.
 import { sendWhatsAppMessage } from './services/WhatsappService';
 import { HumanMessage } from '@langchain/core/messages';
 import { initializeAgent } from './utils/initializeAgent';
-import { get_nse_stocks_data } from './tools/stocks';
+import { get_all_stocks, get_nse_stocks_data } from './tools/stocks';
 
 dotenv.config()
 const app = express();
@@ -23,7 +23,7 @@ const { WEBHOOK_VERIFY_TOKEN, PORT, CLOUD_API_ACCESS_TOKEN, CLOUD_API_VERSION } 
 
 app.get('/', async (req, res) => {
 
-    const stocks = await get_nse_stocks_data();
+    const stocks = await get_all_stocks();
 
     res.status(200).json(stocks)
 })

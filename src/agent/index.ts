@@ -60,7 +60,7 @@ import {
   GetAllStocksResponse
 } from "../types";
 import { AirdropRecipient } from "../tools/hts/transactions/airdrop";
-import { buy_stock, get_nse_stocks_data, get_all_stocks } from "../tools/stocks";
+import { buy_stock, get_nse_stocks_data, get_all_stocks, get_investor_portfolio } from "../tools/stocks";
 import { ContractTransactionReceipt } from "ethers";
 
 
@@ -300,5 +300,9 @@ export default class HederaAgentKit {
 
   async getAllStocks(): Promise<Array<GetAllStocksResponse>> {
     return get_all_stocks()
+  }
+
+  async getInvestorPortfolio(investorAddress: string) {
+    return get_investor_portfolio(investorAddress)
   }
 }

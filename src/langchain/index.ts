@@ -948,43 +948,6 @@ Example usage:
   }
 }
 
-
-export class HederaGetNseStockDataTool extends Tool {
-  name = 'get_nse_stocks_data'
-
-  description = `Get the stock data stored.`
-
-
-  constructor(private hederaKit: HederaAgentKit) {
-
-    super()
-  }
-
-  protected async _call(): Promise<string> {
-    try {
-
-      const stocks = await this.hederaKit.getNseStocksdata();
-      const humanMessage = await generateAIContent(`
-          Summarize the data below to a format that is easy to read and understand for a user in Whatsapp:
-          ${JSON.stringify({
-        status: "success",
-        stocks: stocks,
-      })
-        }
-        `)
-
-      return humanMessage
-
-    } catch (error: any) {
-      return JSON.stringify({
-        status: "error",
-        message: error.message,
-        code: error.code || "UNKNOWN_ERROR",
-      });
-    }
-  }
-}
-
 export class HederaCreateHederaWalletTool extends Tool {
   name = 'create_hedera_wallet'
 
@@ -1203,56 +1166,49 @@ export class HederaBuyStockTool extends Tool {
 //   }
 // }
 
-// export class HederaGetInvestorPortfolioTool extends Tool {
-//   name = "hedera_get_investor_portfolio";
-//   description = `Retrieves the stock portfolio of an investor from the NSEStockInvestment smart contract on the Hedera network.
+export class HederaGetInvestorPortfolioTool extends Tool {
+  name = "hedera_get_investor_portfolio";
+  description = `Retrieves the stock portfolio of an investor from the NSEStockInvestment smart contract on the Hedera network.
 
-//   Inputs (JSON string):
-//   - investorAddress: string - The address of the investor.
+  Inputs (JSON string):
+  - investorAddress: string - The address of the investor.
 
-//   Outputs:
-//   - Investor Portfolio (JSON array) containing:
-//     - symbol: string
-//     - totalShares: number
-//   `;
+  Outputs:
+  - Investor Portfolio (JSON array) containing:
+    - symbol: string
+    - totalShares: number
+  `;
 
-//   constructor(private hederaKit: HederaAgentKit) {
-//     super();
-//   }
+  constructor(private hederaKit: HederaAgentKit) {
+    super();
+  }
 
-//   protected async _call(input: string): Promise<string> {
-//     try {
-//       const { investorAddress } = JSON.parse(input);
+  protected async _call(input: string): Promise<string> {
+    try {
+      const { investorAddress } = JSON.parse(input);
 
-//       if (!investorAddress) {
-//         return JSON.stringify({
-//           status: "error",
-//           message: "Missing required input field: investorAddress.",
-//           code: "MISSING_INPUT",
-//         });
-//       }
+      if (!investorAddress) {
+        return JSON.stringify({
+          status: "error",
+          message: "Missing required input field: investorAddress.",
+          code: "MISSING_INPUT",
+        });
+      }
 
-//       const abi = getContractAbi("NSEStockInvestment");
-//       const contract = new ethers.Contract(nseStockInvestmentContract!, abi, provider);
+      const portfolio = await this.hederaKit.getInvestorPortfolio(investorAddress);
 
-//       const holdings = await contract.getInvestorPortfolio(investorAddress);
+      return JSON.stringify(portfolio);
 
-//       const formattedResponse = holdings.map(([symbol, totalShares]: [string, BigNumber]) => ({
-//         symbol,
-//         totalShares: totalShares.toString(),
-//       }));
-
-//       return JSON.stringify(formattedResponse);
-//     } catch (error: any) {
-//       console.error("Error fetching investor portfolio:", error);
-//       return JSON.stringify({
-//         status: "error",
-//         message: error.message,
-//         code: error.code || "UNKNOWN_ERROR",
-//       });
-//     }
-//   }
-// }
+    } catch (error: any) {
+      console.error("Error fetching investor portfolio:", error);
+      return JSON.stringify({
+        status: "error",
+        message: error.message,
+        code: error.code || "UNKNOWN_ERROR",
+      });
+    }
+  }
+}
 
 export class HederaGetAllStocksTool extends Tool {
   name = "hedera_get_all_stocks";
@@ -1315,9 +1271,9 @@ export function createHederaTools(hederaKit: HederaAgentKit): Tool[] {
     new HederaSubmitTopicMessageTool(hederaKit),
     new HederaGetTopicInfoTool(hederaKit),
     new HederaGetTopicMessagesTool(hederaKit),
-    new HederaGetNseStockDataTool(hederaKit),
     new HederaCreateHederaWalletTool(hederaKit),
     new HederaBuyStockTool(hederaKit),
-    new HederaGetAllStocksTool(hederaKit)
+    new HederaGetAllStocksTool(hederaKit),
+    new HederaGetInvestorPortfolioTool(hederaKit)
   ]
 }
