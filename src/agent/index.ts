@@ -57,10 +57,9 @@ import {
   MintNFTResult,
   NseStockData,
   CreateHederaWalletResponse,
-  GetAllStocksResponse
 } from "../types";
 import { AirdropRecipient } from "../tools/hts/transactions/airdrop";
-import { buy_stock, get_nse_stocks_data, get_all_stocks, get_investor_portfolio } from "../tools/stocks";
+import { buy_stock, get_nse_stocks_data, get_all_stocks, get_investor_portfolio, sell_stock, get_stock_by_symbol } from "../tools/stocks";
 import { ContractTransactionReceipt } from "ethers";
 
 
@@ -304,5 +303,13 @@ export default class HederaAgentKit {
 
   async getInvestorPortfolio(investorAddress: string) {
     return get_investor_portfolio(investorAddress)
+  }
+
+  async sellStock(stockSymbol: string, amount: number, clientPrivateKey: string) {
+    return sell_stock(stockSymbol, amount, clientPrivateKey)
+  }
+
+  async getStockBySymbol(stockSymbol: string) {
+    return get_stock_by_symbol(stockSymbol)
   }
 }
