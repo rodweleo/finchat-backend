@@ -1275,6 +1275,8 @@ export function createHederaTools(hederaKit: HederaAgentKit): Tool[] {
     new HederaCreateHederaWalletTool(hederaKit),
     new HederaBuyStockTool(hederaKit),
     new HederaGetAllStocksTool(hederaKit),
-    new HederaGetInvestorPortfolioTool(hederaKit)
+    new HederaGetInvestorPortfolioTool(hederaKit),
+    new HederaSellStockTool(hederaKit),
+    new HederaGetStockTool(hedera)
   ]
 }
