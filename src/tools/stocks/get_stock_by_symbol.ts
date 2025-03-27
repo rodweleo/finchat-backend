@@ -6,12 +6,12 @@ export async function get_stock_by_symbol(stockSymbol: string) {
         const result = await nseStockInvestmentContract.getStockDetails(stockSymbol);
 
         // Format the response
-        const stockDetails = result.map((stock: any) => ({
-            name: stock[0],         // Stock name (e.g., "IBM" or "Safaricom")
-            price: Number(stock[1]), // Convert BigNumber to a regular number
-            totalSupply: Number(stock[2]), // Convert BigNumber to a regular number
-            active: stock[3],       // Stock active status (true/false)
-        }));
+        const stockDetails = {
+            name: result[0],         // Stock name (e.g., "IBM" or "Safaricom")
+            price: Number(result[1]), // Convert BigNumber to a regular number
+            totalSupply: Number(result[2]), // Convert BigNumber to a regular number
+            active: result[3],       // Stock active status (true/false)
+        };
 
         return stockDetails;
 
@@ -19,3 +19,7 @@ export async function get_stock_by_symbol(stockSymbol: string) {
         console.error(`Error retrieving ${stockSymbol}'s stock details:`, error);
     }
 }
+
+get_stock_by_symbol("SCOM").then((res) => {
+    console.log(res)
+})
