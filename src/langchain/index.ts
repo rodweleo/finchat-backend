@@ -1230,7 +1230,7 @@ export class HederaGetAllStocksTool extends Tool {
   protected async _call(): Promise<string> {
     try {
 
-      const stocks = this.hederaKit.getAllStocks();
+      const stocks = await this.hederaKit.getAllStocks();
 
       return JSON.stringify(stocks);
 
