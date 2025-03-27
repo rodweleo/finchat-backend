@@ -1215,7 +1215,7 @@ export class HederaGetAllStocksTool extends Tool {
   description = `Retrieves all listed stocks from the NSEStockInvestment smart contract on the Hedera network.
 
   Outputs:
-  - stocks: A list of stock data containing:
+  - A (JSON array) containing a list of stock data containing:
     - symbol: string - The stock symbol (e.g., "SCOM").
     - name: string - The stock name (e.g., "Safaricom").
     - price: number - The price per share.
@@ -1232,7 +1232,7 @@ export class HederaGetAllStocksTool extends Tool {
 
       const stocks = this.hederaKit.getAllStocks();
 
-      return JSON.stringify({ stocks: stocks });
+      return JSON.stringify(stocks);
 
     } catch (error: any) {
       console.error("Error fetching stocks:", error);
