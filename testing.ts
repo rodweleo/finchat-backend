@@ -6,6 +6,7 @@ import * as dotenv from 'dotenv'
 import { Client, PrivateKey, AccountCreateTransaction, Hbar, Mnemonic } from "@hashgraph/sdk";
 dotenv.config()
 
+
 const { NSEStockInvestmentContractAddress, HEDERA_TESTNET_RPC_URL, HEDERA_PRIVATE_KEY } = process.env
 
 const provider = new ethers.JsonRpcProvider(HEDERA_TESTNET_RPC_URL);
@@ -36,7 +37,7 @@ async function buyStocks(stockSymbol: string, amount: number) {
 
 
 // console.log(getABI('NSEStockInvestment'))
-buyStocks('SCOM', 5)
+// buyStocks('SCOM', 5)
 
 function hedera_to_eth_address(hederaPublicKey: string) {
     // Remove the first 24 characters of the public key (prefix)
@@ -104,3 +105,4 @@ async function create_hedera_wallet() {
 // console.log(Mnemonic.generate12().then((res) => {
 //     console.log(res)
 // }))
+

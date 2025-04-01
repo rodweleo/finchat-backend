@@ -63,7 +63,7 @@ tokenMetadata: string, containing metadata associated with this token, empty str
 
 // FIXME: works well in isolation but normally usually createFT is called instead of createNFT
 export class HederaCreateNonFungibleTokenTool extends Tool {
-  name = 'hedera_create_fungible_token'
+  name = 'hedera_create_non_fungible_token'
 
   description = `Create a non fungible (NFT) token on Hedera
 Inputs ( input is a JSON string ):

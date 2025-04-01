@@ -268,6 +268,52 @@ app.get("/api/v1/whatsapp/webhook", (req, res) => {
     }
 });
 
+//Chat with AI endpoint through API Calls
+app.post('/api/v1/chat', async (req, res) => {
+
+    // log incoming messages
+    console.log("Incoming message:", JSON.stringify(req.body, null, 2));
+
+    const { message } = req.body;
+
+    if (!message) {
+        res.status(400).json({ error: "Message is required" });
+    }
+
+    try {
+        // Initialize the agent
+        const { agent, config } = await initializeAgent();
+
+        // Send user input to the agent
+        const stream = await agent.stream(
+            { messages: [new HumanMessage(message)] },
+            config
+        );
+
+        let agentResponse = "";
+
+        for await (const chunk of stream) {
+            if ("agent" in chunk) {
+                agentResponse += chunk.agent.messages[0].content + " ";
+            } else if ("tools" in chunk) {
+                agentResponse += chunk.tools.messages[0].content + " ";
+            }
+        }
+
+        // Send the response to the user on WhatsApp
+        res.status(200).json({
+            response: agentResponse
+        })
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            error: "Sorry, an error occurred while processing your request."
+        })
+    }
+
+})
+
 app.listen(PORT, () => {
     console.log(`Server is listening on port: ${PORT}`);
 });

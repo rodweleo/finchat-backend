@@ -19,7 +19,3 @@ export async function get_stock_by_symbol(stockSymbol: string) {
         console.error(`Error retrieving ${stockSymbol}'s stock details:`, error);
     }
 }
-
-get_stock_by_symbol("SCOM").then((res) => {
-    console.log(res)
-})
