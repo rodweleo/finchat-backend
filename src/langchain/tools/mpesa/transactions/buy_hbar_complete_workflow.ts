@@ -117,6 +117,7 @@ Example usage:
             const buyResult = await this.stkPushTool.invoke(input);
             const parsedBuyResult = JSON.parse(buyResult);
 
+
             if (parsedBuyResult.status !== "success") {
                 return buyResult; 
             }
@@ -129,6 +130,10 @@ Example usage:
             const hederaAccountId = parsedCompleteWF.hederaAccountId;
             const amount = parsedCompleteWF.amount;
 
+            await this.sendWhatsAppTool.invoke(JSON.stringify({
+                phoneNumber,
+                message: `M-Pesa payment initiated. You will receive a WhatsApp message once the payment is confirmed and HBAR tokens are transferred.`
+            }));
 
             // Transaction is completed, transfer HBAR tokens
             const hbarAmount = this.calculateHBARAmount(amount);
@@ -157,21 +162,7 @@ Example usage:
             }
 
             // Return success response
-            return JSON.stringify({
-                status: "success",
-                message: "M-Pesa payment initiated. You will receive a WhatsApp message once the payment is confirmed and HBAR tokens are transferred.",
-                data: {
-                    transactionId,
-                    phoneNumber,
-                    hederaAccountId,
-                    amount,
-                    nextSteps: [
-                        "Complete the payment on your phone",
-                        "Wait for payment confirmation",
-                        "You will receive a WhatsApp message when HBAR tokens are transferred"
-                    ]
-                }
-            });
+            return "Completed..."
         } catch (error: any) {
             console.error("Error in buy HBAR workflow:", error);
             return JSON.stringify({
