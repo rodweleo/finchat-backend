@@ -245,3 +245,34 @@ export type GetAllStocksResponse = {
     totalSupply: number;
     active: boolean
 }
+
+export type STKPushRequest = {
+    BusinessShortCode?: string;
+    Password?: string;
+    Timestamp?: string;
+    TransactionType?: string;
+    Amount: number;
+    PartyA?: string;
+    PartyB?: string;
+    PhoneNumber: string;
+    CallBackURL?: string;
+    AccountReference: string;
+    TransactionDesc: string;
+}
+
+export type STKPushResponse = {
+    MerchantRequestID: string;
+    CheckoutRequestID: string;
+    ResponseCode: string;
+    ResponseDescription: string;
+    CustomerMessage: string;
+}
+
+export type AccessTokenResponse = {
+    access_token: string;
+    expires_in: string;
+}
+
+export type InitiateStkPushOptions = {
+
+}

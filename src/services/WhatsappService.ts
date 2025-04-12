@@ -36,22 +36,6 @@ export const sendWhatsAppMessage = async ({ to, messageId, text }: SendWhatsAppM
                 recipient_type: 'individual',
                 to: to,
                 type: "text",
-                // template: {
-                //     name: "finchat_transaction_success",
-                //     language: {
-                //         code: "en_US",
-                //     },
-                //     components: [
-                //         {
-                //             type: "body",
-                //             parameters: [
-                //                 { type: "text", text: "Winnie Gitau" },
-                //                 { type: "text", text: "500 HBAR" },
-                //                 { type: "text", text: "50 KPLC Shares" },
-                //             ],
-                //         },
-                //     ],
-                // },
                 text: {
                     "body": text
                 },

@@ -10,7 +10,7 @@ import { checkCryptoWalletBalance, sendCrypto, verifyCryptoTransaction } from '.
 import { sendWhatsAppMessage } from './services/WhatsappService';
 import { HumanMessage } from '@langchain/core/messages';
 import { initializeAgent } from './utils/initializeAgent';
-import { get_all_stocks, get_nse_stocks_data } from './tools/stocks';
+import { get_all_stocks } from './tools/stocks';
 
 dotenv.config()
 const app = express();
@@ -116,11 +116,37 @@ app.post("/api/v1/mpesa/payment/stkCallbackURL", async (req, res) => {
                 result_code: ResultCode,
                 result_desc: ResultDesc,
                 mpesa_receipt: mpesaReceipt,
-                status: ResultCode === 0 ? 'completed' : 'failed'
+                amount: amount,
+                phone_number: phoneNumber,
+                status: ResultCode === 0 ? 'completed' : 'failed',
+                callback_timestamp: new Date().toISOString()
             })
             .eq('checkout_request_id', CheckoutRequestID);
 
         console.log("STK Callback Processed Successfully");
+
+        // If payment was successful, notify the user via WhatsApp
+        if (ResultCode === 0 && phoneNumber) {
+            try {
+                // Format the phone number for WhatsApp (add country code if needed)
+                const formattedPhoneNumber = phoneNumber.startsWith('254') ? phoneNumber : `254${phoneNumber.substring(1)}`;
+                
+                // Generate a unique message ID for this notification
+                const notificationMessageId = `payment_notification_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+                
+                // Send a success message to the user
+                await sendWhatsAppMessage({
+                    to: formattedPhoneNumber,
+                    messageId: notificationMessageId,
+                    text: `Payment of KES ${amount} has been received successfully! Thank you for your payment.`
+                });
+                
+                console.log(`Payment notification sent to ${formattedPhoneNumber}`);
+            } catch (whatsappError) {
+                console.error("Error sending WhatsApp notification:", whatsappError);
+                // Continue with the response even if WhatsApp notification fails
+            }
+        }
 
         if (error) {
             res.status(500).json({ error })
@@ -203,24 +229,84 @@ app.post('/api/v1/whatsapp/webhook', async (req, res) => {
             // Initialize the agent
             const { agent, config } = await initializeAgent();
 
-            // Send user input to the agent
+            // Create a context object with the user's phone number
+            const context = {
+                ...config,
+                userPhoneNumber: userPhoneNumber
+            };
+
+            // Send user input to the agent with context
             const stream = await agent.stream(
                 { messages: [new HumanMessage(userInput)] },
-                config
+                context
             );
 
             let agentResponse = "";
+            let toolResponses = [];
 
             for await (const chunk of stream) {
                 if ("agent" in chunk) {
-                    agentResponse += chunk.agent.messages[0].content + " ";
+                    const content = chunk.agent.messages[0].content;
+                    if (typeof content === 'string') {
+                        agentResponse += content + " ";
+                    } else if (Array.isArray(content)) {
+                        // Handle array of message objects
+                        for (const item of content) {
+                            if (item.type === 'text' && item.text) {
+                                agentResponse += item.text + " ";
+                            }
+                        }
+                    } else {
+                        // For other object types, try to extract text if available
+                        if (content.text) {
+                            agentResponse += content.text + " ";
+                        } else {
+                            agentResponse += JSON.stringify(content) + " ";
+                        }
+                    }
                 } else if ("tools" in chunk) {
-                    agentResponse += chunk.tools.messages[0].content + " ";
+                    const content = chunk.tools.messages[0].content;
+                    if (typeof content === 'string') {
+                        // Store tool responses separately
+                        toolResponses.push(content);
+                    } else if (Array.isArray(content)) {
+                        // Handle array of message objects
+                        for (const item of content) {
+                            if (item.type === 'text' && item.text) {
+                                toolResponses.push(item.text);
+                            }
+                        }
+                    } else {
+                        // For other object types, try to extract text if available
+                        if (content.text) {
+                            toolResponses.push(content.text);
+                        } else {
+                            toolResponses.push(JSON.stringify(content));
+                        }
+                    }
+                }
+            }
+
+            // Clean up the agent response by removing any tool JSON responses
+            let finalResponse = agentResponse;
+            
+            // Remove any tool JSON responses from the agent response
+            for (const toolResponse of toolResponses) {
+                // Check if the tool response is a JSON string
+                if (toolResponse.startsWith('{') && toolResponse.endsWith('}')) {
+                    try {
+                        // Try to parse it as JSON to confirm it's a valid JSON
+                        JSON.parse(toolResponse);
+                        // If it's valid JSON, remove it from the agent response
+                        finalResponse = finalResponse.replace(toolResponse, '');
+                    } catch (e) {
+                        // Not valid JSON, keep it in the response
+                    }
                 }
             }
 
             // Send the response to the user on WhatsApp
-            await sendWhatsAppMessage({ to: userPhoneNumber, messageId: messageId, text: agentResponse.trim() });
+            await sendWhatsAppMessage({ to: userPhoneNumber, messageId: messageId, text: finalResponse.trim() });
 
             // Mark message as read
             await axios.post(
@@ -291,18 +377,72 @@ app.post('/api/v1/chat', async (req, res) => {
         );
 
         let agentResponse = "";
+        let toolResponses = [];
 
         for await (const chunk of stream) {
             if ("agent" in chunk) {
-                agentResponse += chunk.agent.messages[0].content + " ";
+                const content = chunk.agent.messages[0].content;
+                if (typeof content === 'string') {
+                    agentResponse += content + " ";
+                } else if (Array.isArray(content)) {
+                    // Handle array of message objects
+                    for (const item of content) {
+                        if (item.type === 'text' && item.text) {
+                            agentResponse += item.text + " ";
+                        }
+                    }
+                } else {
+                    // For other object types, try to extract text if available
+                    if (content.text) {
+                        agentResponse += content.text + " ";
+                    } else {
+                        agentResponse += JSON.stringify(content) + " ";
+                    }
+                }
             } else if ("tools" in chunk) {
-                agentResponse += chunk.tools.messages[0].content + " ";
+                const content = chunk.tools.messages[0].content;
+                if (typeof content === 'string') {
+                    // Store tool responses separately
+                    toolResponses.push(content);
+                } else if (Array.isArray(content)) {
+                    // Handle array of message objects
+                    for (const item of content) {
+                        if (item.type === 'text' && item.text) {
+                            toolResponses.push(item.text);
+                        }
+                    }
+                } else {
+                    // For other object types, try to extract text if available
+                    if (content.text) {
+                        toolResponses.push(content.text);
+                    } else {
+                        toolResponses.push(JSON.stringify(content));
+                    }
+                }
+            }
+        }
+
+        // Clean up the agent response by removing any tool JSON responses
+        let finalResponse = agentResponse;
+        
+        // Remove any tool JSON responses from the agent response
+        for (const toolResponse of toolResponses) {
+            // Check if the tool response is a JSON string
+            if (toolResponse.startsWith('{') && toolResponse.endsWith('}')) {
+                try {
+                    // Try to parse it as JSON to confirm it's a valid JSON
+                    JSON.parse(toolResponse);
+                    // If it's valid JSON, remove it from the agent response
+                    finalResponse = finalResponse.replace(toolResponse, '');
+                } catch (e) {
+                    // Not valid JSON, keep it in the response
+                }
             }
         }
 
         // Send the response to the user on WhatsApp
         res.status(200).json({
-            response: agentResponse
+            response: finalResponse.trim()
         })
 
     } catch (error) {

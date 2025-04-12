@@ -3,12 +3,14 @@ import { MemorySaver } from "@langchain/langgraph";
 import HederaAgentKit from "../agent";
 import { createHederaTools } from "../langchain";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import MpesaAgentKit from "../agent/mpesa";
+import { createMPesaTools } from "../langchain/tools/mpesa";
 
 export const initializeAgent = () => {
     try {
         const llm = new ChatGoogleGenerativeAI({
-            modelName: "gemini-1.5-flash",
-            maxOutputTokens: 2048,
+            modelName: "gemini-2.0-flash",
+            temperature: 0.7,
             apiKey: process.env.GOOGLE_GEMINI_API_KEY!
         });
 
@@ -20,20 +22,23 @@ export const initializeAgent = () => {
             // You can specify 'testnet', 'previewnet', or 'mainnet'.
             process.env.HEDERA_NETWORK as "mainnet" | "testnet" | "previewnet" || "testnet"
         );
+        const mpesaAgentKit = new MpesaAgentKit()
 
         // Create the LangChain-compatible tools
-        const tools = createHederaTools(hederaKit);
+        const hederaTools = createHederaTools(hederaKit);
+        const mpesaTools = createMPesaTools(mpesaAgentKit, hederaKit)
+
 
         // Prepare an in-memory checkpoint saver
         const memory = new MemorySaver();
 
         // Additional configuration for the agent
-        const config = { configurable: { thread_id: "Hedera Agent Kit!" } };
+        const config = { configurable: { thread_id: "Hivex Agent Kit!" } };
 
         // Create the React agent
         const agent = createReactAgent({
             llm,
-            tools,
+            tools: [...hederaTools, ...mpesaTools],
             checkpointSaver: memory,
             // You can adjust this message for your scenario:
             messageModifier: `
