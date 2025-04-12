@@ -70,7 +70,7 @@ Example usage:
                 phoneNumber,
                 message: `Your M-Pesa payment for HBAR tokens is taking longer than expected. Please check your phone to complete the payment. If you've already paid, please contact support.`
             }));
-        }, 20000);
+        }, 10000);
 
         this.pollingTimeouts.set(transactionId, timeout);
 
@@ -114,7 +114,7 @@ Example usage:
             // Stop polling
             clearTimeout(timeout);
             this.pollingTimeouts.delete(transactionId);
-            
+
             if (parsedStatus.status === "success" && parsedStatus.data.status === 'failed') {
                 // Transaction failed, notify user
                 await this.sendWhatsAppTool.invoke(JSON.stringify({
