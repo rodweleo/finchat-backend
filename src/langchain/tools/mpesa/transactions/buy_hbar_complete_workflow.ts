@@ -60,7 +60,7 @@ Example usage:
             clearTimeout(this.pollingTimeouts.get(transactionId));
         }
 
-        // Set a timeout to stop polling after 20 seconds
+        // Set a timeout to stop polling after 1 minute
         const timeout = setTimeout(async () => {
             console.log(`Polling timeout reached for transaction ${transactionId}`);
             this.pollingTimeouts.delete(transactionId);
@@ -127,7 +127,7 @@ Example usage:
                 this.pollingTimeouts.delete(transactionId);
             } else {
                 // Transaction not completed yet, check again in 10 seconds
-                setTimeout(poll, 3000);
+                setTimeout(poll, 1000); // Reduced from 3000 to 1000 (1 second)
             }
         };
 
