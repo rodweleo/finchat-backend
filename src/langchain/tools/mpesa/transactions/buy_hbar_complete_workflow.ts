@@ -60,7 +60,7 @@ Example usage:
             clearTimeout(this.pollingTimeouts.get(transactionId));
         }
 
-        // Set a timeout to stop polling after 1 minute
+        // Set a timeout to stop polling after 20 seconds
         const timeout = setTimeout(async () => {
             console.log(`Polling timeout reached for transaction ${transactionId}`);
             this.pollingTimeouts.delete(transactionId);
@@ -85,37 +85,37 @@ Example usage:
 
             const parsedStatus = JSON.parse(statusResult);
 
-            if (parsedStatus.status === "success" && parsedStatus.data.status === 'completed') {
-                // Transaction is completed, transfer HBAR tokens
-                const hbarAmount = this.calculateHBARAmount(amount);
+            // Transaction is completed, transfer HBAR tokens
+            const hbarAmount = this.calculateHBARAmount(amount);
 
-                const transferResult = await this.transferHBARTool.invoke(JSON.stringify({
-                    toAccountId: hederaAccountId,
-                    amount: hbarAmount
+            const transferResult = await this.transferHBARTool.invoke(JSON.stringify({
+                toAccountId: hederaAccountId,
+                amount: hbarAmount
+            }));
+
+            console.log("HBAR Transfer result: ", transferResult)
+
+            const parsedTransfer = JSON.parse(transferResult);
+
+            if (parsedTransfer.status === "success") {
+                // Send success message to user
+                await this.sendWhatsAppTool.invoke(JSON.stringify({
+                    phoneNumber,
+                    message: `Your HBAR tokens have been successfully transferred to your Hedera account ${hederaAccountId}. Amount: ${hbarAmount} HBAR. Transaction ID: ${transactionId}`
                 }));
+            } else {
+                // Send error message about transfer
+                await this.sendWhatsAppTool.invoke(JSON.stringify({
+                    phoneNumber,
+                    message: `Your M-Pesa payment was successful, but there was an issue transferring HBAR tokens. Please contact support with transaction ID: ${transactionId}`
+                }));
+            }
 
-                console.log("HBAR Transfer result: ", transferResult)
-
-                const parsedTransfer = JSON.parse(transferResult);
-
-                if (parsedTransfer.status === "success") {
-                    // Send success message to user
-                    await this.sendWhatsAppTool.invoke(JSON.stringify({
-                        phoneNumber,
-                        message: `Your HBAR tokens have been successfully transferred to your Hedera account ${hederaAccountId}. Amount: ${hbarAmount} HBAR. Transaction ID: ${transactionId}`
-                    }));
-                } else {
-                    // Send error message about transfer
-                    await this.sendWhatsAppTool.invoke(JSON.stringify({
-                        phoneNumber,
-                        message: `Your M-Pesa payment was successful, but there was an issue transferring HBAR tokens. Please contact support with transaction ID: ${transactionId}`
-                    }));
-                }
-
-                // Stop polling
-                clearTimeout(timeout);
-                this.pollingTimeouts.delete(transactionId);
-            } else if (parsedStatus.status === "success" && parsedStatus.data.status === 'failed') {
+            // Stop polling
+            clearTimeout(timeout);
+            this.pollingTimeouts.delete(transactionId);
+            
+            if (parsedStatus.status === "success" && parsedStatus.data.status === 'failed') {
                 // Transaction failed, notify user
                 await this.sendWhatsAppTool.invoke(JSON.stringify({
                     phoneNumber,
