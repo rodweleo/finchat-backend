@@ -54,36 +54,81 @@ Example usage:
         return mpesaAmount / 100; // Example: 1 M-Pesa = 0.01 HBAR
     }
 
-    private startPolling(transactionId: string, phoneNumber: string, hederaAccountId: string, amount: number) {
-        // Clear any existing timeout for this transaction
-        if (this.pollingTimeouts.has(transactionId)) {
-            clearTimeout(this.pollingTimeouts.get(transactionId));
-        }
+    // private startPolling(transactionId: string, phoneNumber: string, hederaAccountId: string, amount: number) {
+    //     // Clear any existing timeout for this transaction
+    //     if (this.pollingTimeouts.has(transactionId)) {
+    //         clearTimeout(this.pollingTimeouts.get(transactionId));
+    //     }
 
-        // Set a timeout to stop polling after 20 seconds
-        const timeout = setTimeout(async () => {
-            console.log(`Polling timeout reached for transaction ${transactionId}`);
-            this.pollingTimeouts.delete(transactionId);
+    //     // Set a timeout to stop polling after 20 seconds
+    //     const timeout = setTimeout(async () => {
+    //         console.log(`Polling timeout reached for transaction ${transactionId}`);
+    //         this.pollingTimeouts.delete(transactionId);
 
-            // Send a timeout message to the user
-            await this.sendWhatsAppTool.invoke(JSON.stringify({
-                phoneNumber,
-                message: `Your M-Pesa payment for HBAR tokens is taking longer than expected. Please check your phone to complete the payment. If you've already paid, please contact support.`
-            }));
-        }, 10000);
+    //         // Send a timeout message to the user
+    //         await this.sendWhatsAppTool.invoke(JSON.stringify({
+    //             phoneNumber,
+    //             message: `Your M-Pesa payment for HBAR tokens is taking longer than expected. Please check your phone to complete the payment. If you've already paid, please contact support.`
+    //         }));
+    //     }, 10000);
 
-        this.pollingTimeouts.set(transactionId, timeout);
+    //     this.pollingTimeouts.set(transactionId, timeout);
 
-        // Function to poll for transaction status
-        const poll = async () => {
-            // Check transaction status
-            const statusResult = await this.checkTransactionTool.invoke(JSON.stringify({
-                checkoutRequestId: transactionId
-            }));
+    //     // Function to poll for transaction status
+    //     const poll = async () => {
+    //         // Check transaction status
+    //         const statusResult = await this.checkTransactionTool.invoke(JSON.stringify({
+    //             checkoutRequestId: transactionId
+    //         }));
 
-            console.log("Transaction status: ", statusResult)
+    //         console.log("Transaction status: ", statusResult)
 
-            const parsedStatus = JSON.parse(statusResult);
+           
+
+    //         // Stop polling
+    //         clearTimeout(timeout);
+    //         this.pollingTimeouts.delete(transactionId);
+
+    //         // if (parsedStatus.status === "success" && parsedStatus.data.status === 'failed') {
+    //         //     // Transaction failed, notify user
+    //         //     await this.sendWhatsAppTool.invoke(JSON.stringify({
+    //         //         phoneNumber,
+    //         //         message: `Your M-Pesa payment for HBAR tokens failed. Reason: ${parsedStatus.data.result_desc}. Please try again.`
+    //         //     }));
+
+    //         //     // Stop polling
+    //         //     clearTimeout(timeout);
+    //         //     this.pollingTimeouts.delete(transactionId);
+    //         // } else {
+    //         //     // Transaction not completed yet, check again in 10 seconds
+    //         //     setTimeout(poll, 1000); // Reduced from 3000 to 1000 (1 second)
+    //         // }
+    //     };
+
+    //     // Start polling
+    //     poll();
+    // }
+
+    protected async _call(input: string): Promise<string> {
+        try {
+            const parsedCompleteWF = JSON.parse(input)
+
+            // Step 1: Initiate M-Pesa payment
+            const buyResult = await this.stkPushTool.invoke(input);
+            const parsedBuyResult = JSON.parse(buyResult);
+
+            if (parsedBuyResult.status !== "success") {
+                return buyResult; 
+            }
+
+            console.log("STK Response: " + buyResult)
+
+            // Extract transaction details
+            const transactionId = parsedBuyResult.data.CheckoutRequestID;
+            const phoneNumber = parsedCompleteWF.phoneNumber;
+            const hederaAccountId = parsedCompleteWF.hederaAccountId;
+            const amount = parsedCompleteWF.amount;
+
 
             // Transaction is completed, transfer HBAR tokens
             const hbarAmount = this.calculateHBARAmount(amount);
@@ -110,59 +155,6 @@ Example usage:
                     message: `Your M-Pesa payment was successful, but there was an issue transferring HBAR tokens. Please contact support with transaction ID: ${transactionId}`
                 }));
             }
-
-            // Stop polling
-            clearTimeout(timeout);
-            this.pollingTimeouts.delete(transactionId);
-
-            if (parsedStatus.status === "success" && parsedStatus.data.status === 'failed') {
-                // Transaction failed, notify user
-                await this.sendWhatsAppTool.invoke(JSON.stringify({
-                    phoneNumber,
-                    message: `Your M-Pesa payment for HBAR tokens failed. Reason: ${parsedStatus.data.result_desc}. Please try again.`
-                }));
-
-                // Stop polling
-                clearTimeout(timeout);
-                this.pollingTimeouts.delete(transactionId);
-            } else {
-                // Transaction not completed yet, check again in 10 seconds
-                setTimeout(poll, 1000); // Reduced from 3000 to 1000 (1 second)
-            }
-        };
-
-        // Start polling
-        poll();
-    }
-
-    protected async _call(input: string): Promise<string> {
-        try {
-            const parsedCompleteWF = JSON.parse(input)
-
-            // Step 1: Initiate M-Pesa payment
-            const buyResult = await this.stkPushTool.invoke(input);
-            const parsedBuyResult = JSON.parse(buyResult);
-
-            if (parsedBuyResult.status !== "success") {
-                return buyResult; 
-            }
-
-            console.log("STK Response: " + buyResult)
-
-            // Extract transaction details
-            const transactionId = parsedBuyResult.data.CheckoutRequestID;
-            const phoneNumber = parsedCompleteWF.phoneNumber;
-            const hederaAccountId = parsedCompleteWF.hederaAccountId;
-            const amount = parsedCompleteWF.amount;
-
-            // Send initial WhatsApp message
-            await this.sendWhatsAppTool.invoke(JSON.stringify({
-                phoneNumber,
-                message: `Your M-Pesa payment for HBAR tokens has been initiated. Please complete the payment on your phone. Once confirmed, HBAR tokens will be sent to your Hedera account ${hederaAccountId}.`
-            }));
-
-            // Start polling for transaction completion
-            this.startPolling(transactionId, phoneNumber, hederaAccountId, amount);
 
             // Return success response
             return JSON.stringify({
