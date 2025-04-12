@@ -57,6 +57,7 @@ Example usage:
             const { data, error } = await query;
             
             if (error) {
+                console.log(error)
                 throw new Error(`Database query error: ${error.message}`);
             }
             
