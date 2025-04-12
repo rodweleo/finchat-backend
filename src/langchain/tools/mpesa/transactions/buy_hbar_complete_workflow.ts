@@ -60,7 +60,7 @@ Example usage:
             clearTimeout(this.pollingTimeouts.get(transactionId));
         }
 
-        // Set a timeout to stop polling after 2 minutes (300000 ms)
+        // Set a timeout to stop polling after 20 seconds
         const timeout = setTimeout(async () => {
             console.log(`Polling timeout reached for transaction ${transactionId}`);
             this.pollingTimeouts.delete(transactionId);
@@ -70,7 +70,7 @@ Example usage:
                 phoneNumber,
                 message: `Your M-Pesa payment for HBAR tokens is taking longer than expected. Please check your phone to complete the payment. If you've already paid, please contact support.`
             }));
-        }, 120000);
+        }, 20000);
 
         this.pollingTimeouts.set(transactionId, timeout);
 
